@@ -12,7 +12,7 @@ repositories {
  
 ```
 dependencies {
-  compile 'com.github.User:Repo:Tag'
+  compile 'com.github.divyenduz:KeyValueDB:1.0.0'
 }
 ```
 
