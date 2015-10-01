@@ -15,8 +15,8 @@ public class KeyValueDB extends SQLiteOpenHelper {
     private static final String TAG = "KeyValueDB";
     private static KeyValueDB sInstance;
 
-    private static final String DATABASE_NAME = "app";
-    private static final String DATABASE_TABLE = "cache";
+    private static String DATABASE_NAME = "_app";
+    private static String DATABASE_TABLE = "_cache";
     private static final int DATABASE_VERSION = 1;
 
     private static final String KEY = "KEY";
@@ -24,11 +24,39 @@ public class KeyValueDB extends SQLiteOpenHelper {
     private static final String PERSIST = "PERSIST";
     private static final String KEY_CREATED_AT = "KEY_CREATED_AT";
 
-
     private static final String CREATE_TABLE = "CREATE TABLE "
             + DATABASE_TABLE + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
             + " TEXT," + PERSIST + " INTEGER," + KEY_CREATED_AT
             + " DATETIME" + ")";
+
+    /**
+     * Returns the current state of KeyValueDB by returning DB / Table name and other parameter
+     *
+     * @return State information
+     */
+    private static String getState() {
+        return "State: " + DATABASE_TABLE + "@" + DATABASE_NAME;
+    }
+
+    /**
+     * Set the DB name
+     *
+     * @param name DB name
+     */
+    public static void setDBName(String name) {
+        KeyValueDB.DATABASE_NAME = name;
+    }
+
+    /**
+     * Set the cache table name
+     * WARNING: Migration is needed if the name is changed for 2nd time
+     * This API is used to run only for the 1st time i.e. 1st install of the app
+     *
+     * @param name Table name
+     */
+    public static void setTableName(String name) {
+        KeyValueDB.DATABASE_TABLE = name;
+    }
 
     private static synchronized KeyValueDB getInstance(Context context) {
         // Use the application context, which will ensure that you
@@ -39,6 +67,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         }
         return sInstance;
     }
+
     /**
      * Constructor should be private to prevent direct instantiation.
      * make call to static method "getInstance()" instead.
@@ -73,6 +102,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
      * @return rowid of the insertion row
      */
     public static synchronized long set(Context context, String key, String value, Integer persist) {
+        Log.i(TAG, getState());
         key = DatabaseUtils.sqlEscapeString(key);
         KeyValueDB dbHelper = getInstance(context);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -96,6 +126,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
      * @return value stored in DB if present, defaultValue otherwise.
      */
     public static synchronized String get(Context context, String key, String defaultValue) {
+        Log.i(TAG, getState());
         key = DatabaseUtils.sqlEscapeString(key);
         Log.v(TAG, "getting cache: " + key);
         KeyValueDB dbHelper = getInstance(context);
