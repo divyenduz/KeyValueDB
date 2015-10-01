@@ -18,9 +18,9 @@ dependencies {
 
 ### Docs
 
-Refer to code for docs, I will add that here in due time
-
-https://github.com/divyenduz/KeyValueDB/blob/master/src/main/java/in/zoid/keyvaluedb/KeyValueDB.java
+  - set(context, key, value, persist)
+  - get(context, key, defaultValue)
+  - clearCacheByLimit(context, limit)
 
 ### License 
 
