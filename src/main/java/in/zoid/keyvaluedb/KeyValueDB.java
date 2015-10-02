@@ -71,7 +71,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         KeyValueDB.DATABASE_TABLE = name;
     }
 
-    public static void setDatabaseVersion(int version) {
+    private static void setDatabaseVersion(int version) {
         KeyValueDB.DATABASE_VERSION = version;
     }
 
