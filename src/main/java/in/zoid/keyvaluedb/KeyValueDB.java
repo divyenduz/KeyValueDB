@@ -17,7 +17,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
 
     private static String DATABASE_NAME = "_app";
     private static String DATABASE_TABLE = "_cache";
-    private static final int DATABASE_VERSION = 1;
+    private static int DATABASE_VERSION = 1;
 
     private static final String KEY = "KEY";
     private static final String VALUE = "VALUE";
@@ -35,7 +35,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
      * @return State information
      */
     private static String getState() {
-        return "State: " + DATABASE_TABLE + "@" + DATABASE_NAME;
+        return "State: " + DATABASE_TABLE + " on " + DATABASE_NAME + " @ " + DATABASE_VERSION;
     }
 
     /**
@@ -56,6 +56,10 @@ public class KeyValueDB extends SQLiteOpenHelper {
      */
     public static void setTableName(String name) {
         KeyValueDB.DATABASE_TABLE = name;
+    }
+
+    public static void setDatabaseVersion(int version) {
+        KeyValueDB.DATABASE_VERSION = version;
     }
 
     private static synchronized KeyValueDB getInstance(Context context) {
@@ -87,6 +91,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.v(TAG, "onUpgrade");
+
         db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
         onCreate(db);
     }
