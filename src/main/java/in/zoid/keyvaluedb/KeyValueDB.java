@@ -4,7 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -24,10 +26,21 @@ public class KeyValueDB extends SQLiteOpenHelper {
     private static final String PERSIST = "PERSIST";
     private static final String KEY_CREATED_AT = "KEY_CREATED_AT";
 
-    private static final String CREATE_TABLE = "CREATE TABLE "
-            + DATABASE_TABLE + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
-            + " TEXT," + PERSIST + " INTEGER," + KEY_CREATED_AT
-            + " DATETIME" + ")";
+    public static String createDBQueryBuilder(String database) {
+        return "CREATE TABLE "
+                + database + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
+                + " TEXT," + PERSIST + " INTEGER," + KEY_CREATED_AT
+                + " DATETIME" + ")";
+    }
+
+    public static String alterTableQueryBuilder(String table, long count, long limit) {
+        return "DELETE FROM " + table +
+                " WHERE " + KEY
+                + " IN (SELECT " + KEY + " FROM " + DATABASE_TABLE
+                + " WHERE " + PERSIST + " = 0"
+                + " ORDER BY " + KEY_CREATED_AT
+                + " ASC LIMIT " + String.valueOf(count - limit) + ");";
+    }
 
     /**
      * Returns the current state of KeyValueDB by returning DB / Table name and other parameter
@@ -85,15 +98,13 @@ public class KeyValueDB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.v(TAG, "onCreate");
-        db.execSQL(CREATE_TABLE);
+        flush(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         Log.v(TAG, "onUpgrade");
-
-        db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
-        onCreate(db);
+        flush(db);
     }
 
     /**
@@ -118,7 +129,13 @@ public class KeyValueDB extends SQLiteOpenHelper {
             values.put(VALUE, value);
             values.put(PERSIST, persist);
             values.put(KEY_CREATED_AT, "time('now')");
-            row = db.replace(DATABASE_TABLE, null, values);
+            Cursor c = null;
+            try {
+                row = db.replace(DATABASE_TABLE, null, values);
+            } catch (SQLiteException e) {
+                flush(e, db);
+                set(context, key, value, persist);
+            }
             db.close();
         }
         return row;
@@ -138,7 +155,13 @@ public class KeyValueDB extends SQLiteOpenHelper {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         String value = defaultValue;
         if (db != null) {
-            Cursor c = db.query(DATABASE_TABLE, new String[]{VALUE}, KEY + "=?", new String[]{key}, null, null, null);
+            Cursor c = null;
+            try {
+                c = db.query(DATABASE_TABLE, new String[]{VALUE}, KEY + "=?", new String[]{key}, null, null, null);
+            } catch (SQLiteException e) {
+                flush(e, db);
+                get(context, key, defaultValue);
+            }
             if (c != null) {
                 if (c.moveToNext()) {
                     value = c.getString(c.getColumnIndex(VALUE));
@@ -165,21 +188,50 @@ public class KeyValueDB extends SQLiteOpenHelper {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         long numRows = 0;
         if (db != null) {
-            Cursor c = db.query(DATABASE_TABLE, null, null, null, null, null, null);
+            Cursor c = null;
+            try {
+                c = db.query(DATABASE_TABLE, null, null, null, null, null, null);
+            } catch (SQLiteException e) {
+                flush(e, db);
+                clearCacheByLimit(context, limit);
+            }
             if (c != null) {
                 long count = c.getCount();
                 Log.v(TAG, "cached rows" + String.valueOf(count));
                 if (count > limit) {
-                    String ALTER_TBL = "DELETE FROM " + DATABASE_TABLE +
-                            " WHERE " + KEY + " IN (SELECT " + KEY + " FROM " + DATABASE_TABLE + " WHERE " + PERSIST + " = 0" + " ORDER BY " + KEY_CREATED_AT + " ASC LIMIT " + String.valueOf(count - limit) + ");";
-                    db.execSQL(ALTER_TBL);
+                    try {
+                        db.execSQL(alterTableQueryBuilder(DATABASE_TABLE, count, limit));
+                    } catch (SQLiteException e) {
+                        flush(e, db);
+                        clearCacheByLimit(context, limit);
+                    }
                 }
-                c = db.query(DATABASE_TABLE, null, null, null, null, null, null);
+                try {
+                    c = db.query(DATABASE_TABLE, null, null, null, null, null, null);
+                } catch (SQLiteException e) {
+                    flush(e, db);
+                    clearCacheByLimit(context, limit);
+                }
                 numRows = count - c.getCount();
                 c.close();
             }
             db.close();
         }
         return numRows;
+    }
+
+    private static void flush(Exception e, SQLiteDatabase db) {
+        e.printStackTrace();
+        flush(db);
+    }
+
+    private static void flush(SQLiteDatabase db) {
+        try {
+            db.execSQL("DROP TABLE IF EXISTS " + DATABASE_TABLE);
+            db.execSQL(createDBQueryBuilder(DATABASE_TABLE));
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new IllegalStateException("SQLException while flush. Have to drop caching");
+        }
     }
 }
