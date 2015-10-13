@@ -26,14 +26,14 @@ public class KeyValueDB extends SQLiteOpenHelper {
     private static final String PERSIST = "PERSIST";
     private static final String KEY_CREATED_AT = "KEY_CREATED_AT";
 
-    public static String createDBQueryBuilder(String database) {
+    private static String createDBQueryBuilder(String database) {
         return "CREATE TABLE "
                 + database + "(" + KEY + " TEXT PRIMARY KEY," + VALUE
                 + " TEXT," + PERSIST + " INTEGER," + KEY_CREATED_AT
                 + " DATETIME" + ")";
     }
 
-    public static String alterTableQueryBuilder(String table, long count, long limit) {
+    private static String alterTableQueryBuilder(String table, long count, long limit) {
         return "DELETE FROM " + table +
                 " WHERE " + KEY
                 + " IN (SELECT " + KEY + " FROM " + DATABASE_TABLE
