@@ -15,6 +15,7 @@ import android.util.Log;
  */
 public class KeyValueDB extends SQLiteOpenHelper {
     private static final String TAG = "KeyValueDB";
+    private static Context sContext;
     private static KeyValueDB sInstance;
 
     private static String DATABASE_NAME = "_app";
@@ -52,11 +53,33 @@ public class KeyValueDB extends SQLiteOpenHelper {
     }
 
     /**
+     * Method to initialize the context in KeyValueDB instance
+     *
+     * @param context Any context object.
+     */
+    public static void init(Context context) {
+        init(context, DATABASE_NAME, DATABASE_TABLE);
+    }
+
+    /**
+     * Method to initialize the context, DB name, table name in KeyValueDB instance
+     *
+     * @param context      Any context object.
+     * @param databaseName DB name
+     * @param tableName    Table name
+     */
+    private static void init(Context context, String databaseName, String tableName) {
+        sContext = context;
+        setDBName(databaseName);
+        setTableName(tableName);
+    }
+
+    /**
      * Set the DB name
      *
      * @param name DB name
      */
-    public static void setDBName(String name) {
+    private static void setDBName(String name) {
         KeyValueDB.DATABASE_NAME = name;
     }
 
@@ -67,10 +90,15 @@ public class KeyValueDB extends SQLiteOpenHelper {
      *
      * @param name Table name
      */
-    public static void setTableName(String name) {
+    private static void setTableName(String name) {
         KeyValueDB.DATABASE_TABLE = name;
     }
 
+    /**
+     * Set the database version
+     *
+     * @param version DB version
+     */
     private static void setDatabaseVersion(int version) {
         KeyValueDB.DATABASE_VERSION = version;
     }
