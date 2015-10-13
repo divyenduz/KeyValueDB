@@ -220,6 +220,65 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return numRows;
     }
 
+    /*
+       Below methods are set / get wrappers for primitive data type wrapper classes.
+     */
+    public static long setInteger(Context context, String key, Integer value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Integer getInteger(Context context, String key, Integer defaultValue) {
+        return Integer.parseInt(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setFloat(Context context, String key, Float value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Float getFloat(Context context, String key, Float defaultValue) {
+        return Float.parseFloat(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setDouble(Context context, String key, Double value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Double getDouble(Context context, String key, Double defaultValue) {
+        return Double.parseDouble(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setBoolean(Context context, String key, Boolean value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Boolean getBoolean(Context context, String key, Boolean defaultValue) {
+        return Boolean.parseBoolean(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setByte(Context context, String key, Byte value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Byte getByte(Context context, String key, Byte defaultValue) {
+        return Byte.parseByte(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setLong(Context context, String key, Long value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Long getLong(Context context, String key, Long defaultValue) {
+        return Long.parseLong(get(context, key, String.valueOf(defaultValue)));
+    }
+
+    public static long setShort(Context context, String key, Short value, Integer persist) {
+        return set(context, key, String.valueOf(value), persist);
+    }
+
+    public static Short getShort(Context context, String key, Short defaultValue) {
+        return Short.parseShort(get(context, key, String.valueOf(defaultValue)));
+    }
+
     private static void flush(Exception e, SQLiteDatabase db) {
         e.printStackTrace();
         flush(db);
