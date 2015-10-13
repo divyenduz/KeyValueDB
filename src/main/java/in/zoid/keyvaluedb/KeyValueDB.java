@@ -15,6 +15,7 @@ import android.util.Log;
  */
 public class KeyValueDB extends SQLiteOpenHelper {
     private static final String TAG = "KeyValueDB";
+    private static Context sContext;
     private static KeyValueDB sInstance;
 
     private static String DATABASE_NAME = "_app";
@@ -52,11 +53,33 @@ public class KeyValueDB extends SQLiteOpenHelper {
     }
 
     /**
+     * Method to initialize the context in KeyValueDB instance
+     *
+     * @param context Any context object.
+     */
+    public static void init(Context context) {
+        init(context, DATABASE_NAME, DATABASE_TABLE);
+    }
+
+    /**
+     * Method to initialize the context, DB name, table name in KeyValueDB instance
+     *
+     * @param context      Any context object.
+     * @param databaseName DB name
+     * @param tableName    Table name
+     */
+    private static void init(Context context, String databaseName, String tableName) {
+        sContext = context;
+        setDBName(databaseName);
+        setTableName(tableName);
+    }
+
+    /**
      * Set the DB name
      *
      * @param name DB name
      */
-    public static void setDBName(String name) {
+    private static void setDBName(String name) {
         KeyValueDB.DATABASE_NAME = name;
     }
 
@@ -67,10 +90,15 @@ public class KeyValueDB extends SQLiteOpenHelper {
      *
      * @param name Table name
      */
-    public static void setTableName(String name) {
+    private static void setTableName(String name) {
         KeyValueDB.DATABASE_TABLE = name;
     }
 
+    /**
+     * Set the database version
+     *
+     * @param version DB version
+     */
     private static void setDatabaseVersion(int version) {
         KeyValueDB.DATABASE_VERSION = version;
     }
@@ -110,6 +138,19 @@ public class KeyValueDB extends SQLiteOpenHelper {
     /**
      * Setter method. Sets a (key, value) pair in sqlite3 db.
      *
+     * @param key     The URL or some other unique id for data can be used
+     * @param value   String data to be saved
+     * @param persist Whether to delete this (key, value, time, persist) tuple, when cleaning cache in
+     *                clearCacheByLimit() method. 1 Means persist, 0 Means remove.
+     * @return rowid of the insertion row
+     */
+    public static synchronized long set(String key, String value, Integer persist) {
+        return set(sContext, key, value, persist);
+    }
+
+    /**
+     * Setter method. Sets a (key, value) pair in sqlite3 db.
+     *
      * @param context Any context object.
      * @param key     The URL or some other unique id for data can be used
      * @param value   String data to be saved
@@ -142,6 +183,19 @@ public class KeyValueDB extends SQLiteOpenHelper {
     }
 
     /**
+     * Getter method. Gets a value based on it's key pair in sqlite3 db.
+     *
+     * @param key          The URL or some other unique id for data can be used
+     * @param defaultValue value to be returned in case something goes wrong or no data is found
+     * @return value stored in DB if present, defaultValue otherwise.
+     */
+    public static synchronized String get(String key, String defaultValue) {
+        return get(sContext, key, defaultValue);
+    }
+
+    /**
+     * Getter method. Gets a value based on it's key pair in sqlite3 db.
+     *
      * @param context      Any context object.
      * @param key          The URL or some other unique id for data can be used
      * @param defaultValue value to be returned in case something goes wrong or no data is found
@@ -172,6 +226,18 @@ public class KeyValueDB extends SQLiteOpenHelper {
             db.close();
         }
         return value;
+    }
+
+    /**
+     * Clear the cache like a FIFO queue defined by the limit parameter.
+     * Each function call made to this will remove count(*)-limit first rows from the DB
+     * Only the data with (Persist, 0) will be removed
+     *
+     * @param limit amount of data to be retained in FIFO, rest would be removed like a queue
+     * @return number of rows affected on success
+     */
+    public static synchronized long clearCacheByLimit(long limit) {
+        return clearCacheByLimit(sContext, limit);
     }
 
     /**
@@ -279,6 +345,69 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Short.parseShort(get(context, key, String.valueOf(defaultValue)));
     }
 
+    /*
+       Below methods are set / get wrappers for primitive data type wrapper classes.
+       This set of methods to not need a passed context.
+     */
+    public static long setInteger(String key, Integer value, Integer persist) {
+        return setInteger(sContext, key, value, persist);
+    }
+
+    public static Integer getInteger(String key, Integer defaultValue) {
+        return getInteger(sContext, key, defaultValue);
+    }
+
+    public static long setFloat(String key, Float value, Integer persist) {
+        return setFloat(sContext, key, value, persist);
+    }
+
+    public static Float getFloat(String key, Float defaultValue) {
+        return getFloat(sContext, key, defaultValue);
+    }
+
+    public static long setDouble(String key, Double value, Integer persist) {
+        return setDouble(sContext, key, value, persist);
+    }
+
+    public static Double getDouble(String key, Double defaultValue) {
+        return getDouble(sContext, key, defaultValue);
+    }
+
+    public static long setBoolean(String key, Boolean value, Integer persist) {
+        return setBoolean(sContext, key, value, persist);
+    }
+
+    public static Boolean getBoolean(String key, Boolean defaultValue) {
+        return getBoolean(sContext, key, defaultValue);
+    }
+
+    public static long setByte(String key, Byte value, Integer persist) {
+        return setByte(sContext, key, value, persist);
+    }
+
+    public static Byte getByte(String key, Byte defaultValue) {
+        return getByte(sContext, key, defaultValue);
+    }
+
+    public static long setLong(String key, Long value, Integer persist) {
+        return setLong(sContext, key, value, persist);
+    }
+
+    public static Long getLong(String key, Long defaultValue) {
+        return getLong(sContext, key, defaultValue);
+    }
+
+    public static long setShort(String key, Short value, Integer persist) {
+        return setShort(sContext, key, value, persist);
+    }
+
+    public static Short getShort(String key, Short defaultValue) {
+        return getShort(sContext, key, defaultValue);
+    }
+
+    /*
+        Below are the private DB creating methods.
+     */
     private static void flush(Exception e, SQLiteDatabase db) {
         e.printStackTrace();
         flush(db);
