@@ -28,19 +28,19 @@ dependencies {
 
   * Basic get / set methods
 
-      -> If context is set using init
+-> If context is set using init
 
       - set(String key, String value, Integer persist)
       - get(String key, String defaultValue)
 
-      -> Independent of context being set using init
+-> Independent of context being set using init
 
       - set(Context context, String key, String value, Integer persist)
       - get(Context context, String key, String defaultValue)
 
   * Wrappers around get / set
 
-      -> If context is set using init
+-> If context is set using init
 
       - setInteger(String key, Integer value, Integer persist)
       - getInteger(String key, Integer defaultValue)
@@ -57,7 +57,7 @@ dependencies {
       - setShort(String key, Short value, Integer persist)
       - getShort(String key, Short defaultValue)
 
-      -> Independent of context being set using init
+-> Independent of context being set using init
       
       - setInteger(Context context, String key, Integer value, Integer persist)
       - getInteger(Context context, String key, Integer defaultValue)
