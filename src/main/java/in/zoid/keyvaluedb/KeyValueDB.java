@@ -144,7 +144,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
      *                clearCacheByLimit() method. 1 Means persist, 0 Means remove.
      * @return rowid of the insertion row
      */
-    public static synchronized long set(String key, String value, Integer persist) {
+    public static synchronized long set(String key, String value, Boolean persist) {
         return set(sContext, key, value, persist);
     }
 
@@ -158,7 +158,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
      *                clearCacheByLimit() method. 1 Means persist, 0 Means remove.
      * @return rowid of the insertion row
      */
-    public static synchronized long set(Context context, String key, String value, Integer persist) {
+    public static synchronized long set(Context context, String key, String value, Boolean persist) {
         Log.i(TAG, getState());
         key = DatabaseUtils.sqlEscapeString(key);
         KeyValueDB dbHelper = getInstance(context);
@@ -168,7 +168,15 @@ public class KeyValueDB extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put(KEY, key);
             values.put(VALUE, value);
-            values.put(PERSIST, persist);
+
+            // Wrapper of Boolean around 0, 1. This was original architecture.
+            // Boolean persist was added for aesthetics
+            if (persist) {
+                values.put(PERSIST, 1);
+            } else {
+                values.put(PERSIST, 0);
+            }
+
             values.put(KEY_CREATED_AT, "time('now')");
             Cursor c = null;
             try {
@@ -289,7 +297,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
     /*
        Below methods are set / get wrappers for primitive data type wrapper classes.
      */
-    public static long setInteger(Context context, String key, Integer value, Integer persist) {
+    public static long setInteger(Context context, String key, Integer value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -297,7 +305,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Integer.parseInt(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setFloat(Context context, String key, Float value, Integer persist) {
+    public static long setFloat(Context context, String key, Float value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -305,7 +313,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Float.parseFloat(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setDouble(Context context, String key, Double value, Integer persist) {
+    public static long setDouble(Context context, String key, Double value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -313,7 +321,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Double.parseDouble(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setBoolean(Context context, String key, Boolean value, Integer persist) {
+    public static long setBoolean(Context context, String key, Boolean value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -321,7 +329,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Boolean.parseBoolean(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setByte(Context context, String key, Byte value, Integer persist) {
+    public static long setByte(Context context, String key, Byte value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -329,7 +337,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Byte.parseByte(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setLong(Context context, String key, Long value, Integer persist) {
+    public static long setLong(Context context, String key, Long value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -337,7 +345,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return Long.parseLong(get(context, key, String.valueOf(defaultValue)));
     }
 
-    public static long setShort(Context context, String key, Short value, Integer persist) {
+    public static long setShort(Context context, String key, Short value, Boolean persist) {
         return set(context, key, String.valueOf(value), persist);
     }
 
@@ -349,7 +357,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
        Below methods are set / get wrappers for primitive data type wrapper classes.
        This set of methods to not need a passed context.
      */
-    public static long setInteger(String key, Integer value, Integer persist) {
+    public static long setInteger(String key, Integer value, Boolean persist) {
         return setInteger(sContext, key, value, persist);
     }
 
@@ -357,7 +365,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getInteger(sContext, key, defaultValue);
     }
 
-    public static long setFloat(String key, Float value, Integer persist) {
+    public static long setFloat(String key, Float value, Boolean persist) {
         return setFloat(sContext, key, value, persist);
     }
 
@@ -365,7 +373,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getFloat(sContext, key, defaultValue);
     }
 
-    public static long setDouble(String key, Double value, Integer persist) {
+    public static long setDouble(String key, Double value, Boolean persist) {
         return setDouble(sContext, key, value, persist);
     }
 
@@ -373,7 +381,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getDouble(sContext, key, defaultValue);
     }
 
-    public static long setBoolean(String key, Boolean value, Integer persist) {
+    public static long setBoolean(String key, Boolean value, Boolean persist) {
         return setBoolean(sContext, key, value, persist);
     }
 
@@ -381,7 +389,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getBoolean(sContext, key, defaultValue);
     }
 
-    public static long setByte(String key, Byte value, Integer persist) {
+    public static long setByte(String key, Byte value, Boolean persist) {
         return setByte(sContext, key, value, persist);
     }
 
@@ -389,7 +397,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getByte(sContext, key, defaultValue);
     }
 
-    public static long setLong(String key, Long value, Integer persist) {
+    public static long setLong(String key, Long value, Boolean persist) {
         return setLong(sContext, key, value, persist);
     }
 
@@ -397,7 +405,7 @@ public class KeyValueDB extends SQLiteOpenHelper {
         return getLong(sContext, key, defaultValue);
     }
 
-    public static long setShort(String key, Short value, Integer persist) {
+    public static long setShort(String key, Short value, Boolean persist) {
         return setShort(sContext, key, value, persist);
     }
 
